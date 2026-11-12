@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Checks (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - run: npm --prefix web ci
+      - run: python3 tools/validate_project.py --project
+      - run: npm --prefix web test
+      - run: npm --prefix web run check
+      - run: npm --prefix web run build
+      - name: Install Chromium
+        if: matrix.node == 24
+        working-directory: web
+        run: npx playwright install --with-deps chromium
+      - name: Browser tests (synthetic data and mock provider)
+        if: matrix.node == 24
+        run: npm --prefix web run test:browser

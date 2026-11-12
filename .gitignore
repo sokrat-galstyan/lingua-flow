@@ -1,0 +1,25 @@
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+*.swp
+*.tmp
+# Private learner voice files: avoid accidental commits if git is used.
+practice/speaking/*.wav
+practice/speaking/*.mp3
+practice/speaking/*.m4a
+practice/speaking/*.mp4
+practice/speaking/*.webm
+# Local web interface
+web/node_modules/
+web/dist/
+web/test-results/
+web/playwright-report/
+.english-web/
+
+# Local credentials and environment overrides
+.env
+.env.*
+!.env.example
+*.log
+web/coverage/
